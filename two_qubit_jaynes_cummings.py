@@ -74,7 +74,7 @@ if __name__ == "__main__":
     rho_bath = np.eye(2) * 0.5
 
     rho = np.kron(rho_bath, rho_system)
-    trace_bath(rho)
+
     local_observable_x = []
     local_observable_y = []
     local_observable_z = []
@@ -149,11 +149,9 @@ if __name__ == "__main__":
     assert np.allclose(local_observable_y_subsystem, local_observable_y)
     assert np.allclose(local_observable_z_subsystem, local_observable_z)
 
-
     plt.plot(time, local_observable_x_subsystem, 'C0^', mfc=None, ms=3, label=r'$X_{s}\;\mathrm{subsystem}$')
     plt.plot(time, local_observable_y_subsystem, 'C1^', mfc=None, ms=3,label=r'$Y_{s}\;\mathrm{subsystem}$')
     plt.plot(time, local_observable_z_subsystem, 'C2^', mfc=None, ms=3, label=r'$Z_{s}\;\mathrm{subsystem}$')
 
     plt.legend(loc='lower right')
     plt.show()
-
