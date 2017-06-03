@@ -9,16 +9,16 @@ from itertools import product
 sigmap = 0.5 * (X - 1j*Y)
 sigmam = 0.5 * (X + 1j*Y)
 
-def euler_integrated(rho_initial, hamiltonian):
+def euler_integrated(rho_initial, hamiltonian, time_steps):
     """
     propogate density matrix for t = [0, 2 pi, 100]
     """
     rhos = []
-    dt = 2 * np.pi / 100
+    dt = 2 * np.pi / time_steps
     rho = np.copy(rho_initial)
-    for t in xrange(100):
+    for t in xrange(time_steps):
         rhos.append(rho)
-        rho = rho + dt * commutator(hamiltonian, rho)
+        rho = rho  + commutator(hamiltonian, rho) * dt
 
     return rhos
 
@@ -26,7 +26,7 @@ def commutator(operator_a, operator_b):
     """
     compute commutator of two operators
     """
-    return operator_a.dot(operator_b) - operator_b.dot(operator_a)
+    return -1j*(operator_a.dot(operator_b) - operator_b.dot(operator_a))
 
 
 def trace_bath(rho):
@@ -96,7 +96,8 @@ if __name__ == "__main__":
     Yb = np.kron(Y, I)
     Zb = np.kron(Z, I)
 
-    time = np.linspace(0, alpha * 2 * np.pi, 100)
+    time_steps = 100
+    time = np.linspace(0, alpha * 2 * np.pi, time_steps)
     rho_system = []
     for t in time:
         propogator = expm(1j*t*jc_driver)
@@ -127,7 +128,8 @@ if __name__ == "__main__":
         print np.trace(rho_system[-1].dot(X))
         local_observable_x_system.append(np.trace(rho_system[-1].dot(X)))
 
-    rhos = euler_integrated(rho, jc_driver)
+    rhos = euler_integrated(rho, jc_driver, time_steps)
+
 
     local_observable_x_euler = map(lambda x: np.trace(Xs.dot(x)), rhos)
     local_observable_y_euler = map(lambda x: np.trace(Ys.dot(x)), rhos)
@@ -141,17 +143,17 @@ if __name__ == "__main__":
     plt.plot(time, local_observable_y, 'C1-', label=r'$Y_{s}$')
     plt.plot(time, local_observable_z, 'C2-', label=r'$Z_{s}$')
 
-    # plt.plot(time, local_observable_x, 'C0o', mfc=None, ms=3, label=r'$X_{s}\;\mathrm{Euler}$')
-    # plt.plot(time, local_observable_y, 'C1o', mfc=None, ms=3,label=r'$Y_{s}\;\mathrm{Euler}$')
-    # plt.plot(time, local_observable_z, 'C2o', mfc=None, ms=3, label=r'$Z_{s}\;\mathrm{Euler}$')
+    plt.plot(time, local_observable_x_euler, 'C0o', mfc=None, ms=3, label=r'$X_{s}\;\mathrm{Euler}$')
+    plt.plot(time, local_observable_y_euler, 'C1o', mfc=None, ms=3,label=r'$Y_{s}\;\mathrm{Euler}$')
+    plt.plot(time, local_observable_z_euler, 'C2o', mfc=None, ms=3, label=r'$Z_{s}\;\mathrm{Euler}$')
 
     assert np.allclose(local_observable_x_subsystem, local_observable_x)
     assert np.allclose(local_observable_y_subsystem, local_observable_y)
     assert np.allclose(local_observable_z_subsystem, local_observable_z)
 
-    plt.plot(time, local_observable_x_subsystem, 'C0^', mfc=None, ms=3, label=r'$X_{s}\;\mathrm{subsystem}$')
-    plt.plot(time, local_observable_y_subsystem, 'C1^', mfc=None, ms=3,label=r'$Y_{s}\;\mathrm{subsystem}$')
-    plt.plot(time, local_observable_z_subsystem, 'C2^', mfc=None, ms=3, label=r'$Z_{s}\;\mathrm{subsystem}$')
+    # plt.plot(time, local_observable_x_subsystem, 'C0^', mfc=None, ms=3, label=r'$X_{s}\;\mathrm{subsystem}$')
+    # plt.plot(time, local_observable_y_subsystem, 'C1^', mfc=None, ms=3,label=r'$Y_{s}\;\mathrm{subsystem}$')
+    # plt.plot(time, local_observable_z_subsystem, 'C2^', mfc=None, ms=3, label=r'$Z_{s}\;\mathrm{subsystem}$')
 
     plt.legend(loc='lower right')
     plt.show()
